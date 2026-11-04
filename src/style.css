@@ -13,6 +13,16 @@
 
 * { box-sizing: border-box; }
 
+html {
+  direction: rtl;
+}
+
+body {
+  direction: rtl;
+  text-align: right;
+}
+
+
 body {
   margin: 0;
   min-width: 320px;
