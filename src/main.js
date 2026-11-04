@@ -108,6 +108,19 @@ const books = [
     year: 1872,
     source: 'Project Gutenberg',
     sourceUrl: 'https://www.gutenberg.org/ebooks/103'
+  },
+  {
+    id: 12,
+    title: 'أليس في بلاد العجائب',
+    originalTitle: "Alice's Adventures in Wonderland",
+    author: 'لويس كارول',
+    category: 'الأدب والروايات والخيال',
+    cover: '/covers/12.jpg',
+    rating: null,
+    arabicAvailable: false,
+    year: 1865,
+    source: 'Project Gutenberg',
+    sourceUrl: 'https://www.gutenberg.org/ebooks/11'
   }
 ];
 

@@ -1,0 +1,15 @@
+{
+  "id": 12,
+  "title": "Alice's Adventures in Wonderland",
+  "title_ar": "أليس في بلاد العجائب",
+  "author": "Lewis Carroll",
+  "author_ar": "لويس كارول",
+  "category": "الأدب والروايات والخيال",
+  "language": "en",
+  "year": 1865,
+  "source": "Project Gutenberg",
+  "source_id": "11",
+  "source_url": "https://www.gutenberg.org/ebooks/11",
+  "license_note": "Public domain in the United States; verify local rights before distribution.",
+  "description": "A curious girl follows a White Rabbit into a fantastical world of strange creatures, unexpected adventures and imaginative puzzles."
+}
