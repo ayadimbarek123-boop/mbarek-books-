@@ -397,13 +397,22 @@ function bindEvents() {
       const response = await fetch(`/books/${book.id}.txt`);
 
       if (!response.ok) {
-        throw new Error('لا يوجد نص مرخص لهذا الكتاب حتى الآن.');
+        throw new Error('لا يوجد نص متاح لهذا الكتاب حتى الآن.');
       }
 
+      const contentType = (response.headers.get('content-type') || '').toLowerCase();
       const text = await response.text();
 
       if (!text.trim()) {
         throw new Error('ملف الكتاب فارغ.');
+      }
+
+      const isHtml =
+        /text\/html|application\/xhtml\+xml/.test(contentType) ||
+        /^\uFEFF?\s*(?:<!doctype\s+html|<html[\s>]|<(?:head|body|script|iframe)[\s>])/i.test(text);
+
+      if (isHtml) {
+        throw new Error('تعذر فتح الكتاب: المصدر أعاد صفحة ويب بدل نص الكتاب.');
       }
 
       openReader({ book, text });
