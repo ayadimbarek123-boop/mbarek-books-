@@ -275,3 +275,23 @@
 .reader-dark-paper .page-number {
   color: #d5b77d;
 }
+
+/* Automatic reading direction by book language */
+.reader-overlay:not(.reader-arabic) .reader-book,
+.reader-overlay:not(.reader-arabic) .book-page-text,
+.reader-overlay:not(.reader-arabic) .book-page-text p {
+  direction: ltr;
+  text-align: left;
+}
+
+.reader-overlay.reader-arabic .reader-book,
+.reader-overlay.reader-arabic .book-page-text,
+.reader-overlay.reader-arabic .book-page-text p {
+  direction: rtl;
+  text-align: right;
+}
+
+.reader-overlay:not(.reader-arabic) .book-page-text p,
+.reader-overlay.reader-arabic .book-page-text p {
+  text-align: justify;
+}
