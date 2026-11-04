@@ -1,7 +1,7 @@
 
 
 import './style.css';
-import { openReader } from './reader/reader.js';
+import { openReader, openPdfReader } from './reader/reader.js';
 
 const icons = {
   home: '⌂',
@@ -250,7 +250,9 @@ function renderDetails(book) {
         ${book.year ? `<p>سنة النشر: ${book.year}</p>` : ""}
         <button class="gold-button" id="addReading">أضف إلى قائمتي القرائية</button>
         <button class="gold-button" id="openBookReader">اقرأ الكتاب ←</button>
-        <p class="notice">تتوفر بيانات تعريفية أولية. سنربط لاحقاً مصادر الكتب وملفات القراءة المرخصة.</p>
+        ${book.id === 1 ? '<a class="gold-button" href="https://openlibrary.org/books/OL22752164M/One_hundred_years_of_solitude" target="_blank" rel="noopener noreferrer" style="display:inline-block;text-decoration:none">استعارة الكتاب من Open Library ↗</a>' : ""}
+        ${book.id === 4 ? '<button class="gold-button" id="chooseLocalPdf" type="button">اختيار نسخة PDF من الهاتف</button><input id="localPdfInput" type="file" accept="application/pdf,.pdf" hidden>' : ""}
+        <p class="notice">بيانات الكتاب متاحة، استمتع بتجربة القراءة الرقمية من مكتبتك.</p>
       </div>
     </section>
   `;
@@ -383,6 +385,27 @@ function bindEvents() {
     selectedBook = null;
     render();
   });
+
+  const choosePdfButton = document.querySelector('#chooseLocalPdf');
+  const localPdfInput = document.querySelector('#localPdfInput');
+
+  if (choosePdfButton && localPdfInput) {
+    choosePdfButton.addEventListener('click', () => localPdfInput.click());
+
+    localPdfInput.addEventListener('change', () => {
+      const file = localPdfInput.files?.[0];
+      if (!file) return;
+
+      if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+        alert('الرجاء اختيار ملف PDF صالح.');
+        localPdfInput.value = '';
+        return;
+      }
+
+      openPdfReader({ book: selectedBook, file });
+      localPdfInput.value = '';
+    });
+  }
 
   document.querySelector('#openBookReader')?.addEventListener('click', async () => {
     const button = document.querySelector('#openBookReader');

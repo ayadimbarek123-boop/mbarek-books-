@@ -44,11 +44,26 @@ function cleanParagraph(value) {
     .replace(/\s+/g, ' ')
     .replace(/^\s*\d+(?:\s*,\s*\d+)*\.\s+/, '')
     .replace(/^\s*[٠-٩]+(?:\s*,\s*[٠-٩]+)*\.\s+/, '')
+    .replace(/\[Illustration\]/gi, '')
+    .replace(/(^|\s)_([^_]+)_(?=\s|[.,!?;:]|$)/g, '$1$2')
+    .replace(/\s+([,.;!?])/g, '$1')
     .trim();
+}
+function extractGutenbergBody(text) {
+  const source = String(text).replace(/\r/g, '');
+
+  const start = source.match(/^[ \t]*\*{3}[ \t]*START OF THE PROJECT GUTENBERG EBOOK\b[^\r\n]*\*{3}[ \t]*$/im);
+  const end = source.match(/^[ \t]*\*{3}[ \t]*END OF THE PROJECT GUTENBERG EBOOK\b[^\r\n]*\*{3}[ \t]*$/im);
+
+  if (start && end && end.index > start.index) {
+    return source.slice(start.index + start[0].length, end.index);
+  }
+
+  return source;
 }
 
 function buildBook(text, language) {
-  const blocks = text
+  const blocks = extractGutenbergBody(text)
     .replace(/\r/g, '')
     .split(/\n\s*\n/)
     .map(block => block.replace(/\s+/g, ' ').trim())
@@ -102,9 +117,10 @@ export function openReader({ book, text, onClose }) {
     return;
   }
 
-  let language = 'en';
-  let englishChapters = buildBook(text, 'en');
-  let arabicChapters = null;
+  const arabicOnly = book.id === 4;
+  let language = arabicOnly ? 'ar' : 'en';
+  let englishChapters = arabicOnly ? [] : buildBook(text, 'en');
+  let arabicChapters = arabicOnly ? buildBook(text, 'ar') : null;
   let loadingArabic = false;
   let dynamicArabic = false;
   let renderedPages = [];
@@ -150,7 +166,7 @@ export function openReader({ book, text, onClose }) {
   const contentArea = container.querySelector('.reader-content');
   const bookArea = container.querySelector('.reader-book');
   const languageButton = container.querySelector('.reader-language');
-  languageButton.hidden = false;
+  languageButton.hidden = arabicOnly;
   const contentsPanel = container.querySelector('.contents-panel');
   const contentsList = container.querySelector('.contents-list');
   const progressBar = container.querySelector('.reader-progress span');
@@ -461,7 +477,64 @@ export function openReader({ book, text, onClose }) {
   renderBook();
 
   requestAnimationFrame(() => {
-    contentArea.scrollTop = progress.enScroll || 0;
+    const savedPosition = arabicOnly ? progress.arScroll : progress.enScroll;
+    contentArea.scrollTop = savedPosition || 0;
     updateProgress();
   });
+}
+
+export function openPdfReader({ book, file }) {
+  if (!book || !file) {
+    alert('لم يتم اختيار ملف.');
+    return;
+  }
+
+  const isPdf = file.type === 'application/pdf' ||
+    file.name.toLowerCase().endsWith('.pdf');
+
+  if (!isPdf) {
+    alert('الملف المختار ليس بصيغة PDF.');
+    return;
+  }
+
+  const pdfUrl = URL.createObjectURL(file);
+  const container = document.createElement('div');
+  container.className = 'reader-overlay';
+
+  container.innerHTML = `
+    <div class="reader-window">
+      <header class="book-toolbar">
+        <button class="reader-close" aria-label="إغلاق">×</button>
+        <div class="toolbar-title">${escapeHTML(book.title)}</div>
+        <div class="toolbar-actions">
+          <span>PDF</span>
+        </div>
+      </header>
+      <main class="reader-content pdf-reader-content">
+        <iframe
+          class="pdf-frame"
+          title="قارئ PDF"
+          src="${pdfUrl}"
+          style="width:100%;height:100%;min-height:70vh;border:0;background:#fff"
+        ></iframe>
+      </main>
+    </div>
+  `;
+
+  document.body.appendChild(container);
+
+  function closePdf() {
+    container.remove();
+    URL.revokeObjectURL(pdfUrl);
+    document.removeEventListener('keydown', keyboardHandler);
+  }
+
+  function keyboardHandler(event) {
+    if (event.key === 'Escape') closePdf();
+  }
+
+  container.querySelector('.reader-close')
+    .addEventListener('click', closePdf);
+
+  document.addEventListener('keydown', keyboardHandler);
 }
