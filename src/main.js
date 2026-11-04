@@ -1,6 +1,7 @@
 
 
 import './style.css';
+import { openReader } from './reader/reader.js';
 
 const icons = {
   home: '⌂',
@@ -28,7 +29,86 @@ const books = [
   { id: 3, title: 'العادات الذرية', author: 'جيمس كلير', category: 'التنمية البشرية', cover: 'https://covers.openlibrary.org/b/isbn/9780735211292-L.jpg', rating: '4.9' },
   { id: 4, title: 'الأب الغني والأب الفقير', author: 'روبرت كيوساكي', category: 'التنمية البشرية', cover: 'https://covers.openlibrary.org/b/isbn/9781612680194-L.jpg', rating: '4.7' },
   { id: 5, title: 'فن الحرب', author: 'سون تزو', category: 'الفلسفة', cover: 'https://covers.openlibrary.org/b/isbn/9781590302255-L.jpg', rating: '4.8' },
-  { id: 6, title: 'التاريخ', author: 'كتب التاريخ العالمية', category: 'التاريخ', cover: 'https://covers.openlibrary.org/b/isbn/9780199537822-L.jpg', rating: '4.6' }
+  {
+    id: 6,
+    title: 'كبرياء وتحامل',
+    originalTitle: 'Pride and Prejudice',
+    author: 'جين أوستن',
+    category: 'الأدب والروايات',
+    cover: '/covers/6.jpg',
+    rating: null,
+    arabicAvailable: false,
+    year: 1813,
+    source: 'Project Gutenberg',
+    sourceUrl: 'https://www.gutenberg.org/ebooks/1342'
+  },
+  {
+    id: 7,
+    title: 'مغامرات شرلوك هولمز',
+    originalTitle: 'The Adventures of Sherlock Holmes',
+    author: 'آرثر كونان دويل',
+    category: 'الأدب والروايات',
+    cover: '/covers/7.jpg',
+    rating: null,
+    arabicAvailable: false,
+    year: 1892,
+    source: 'Project Gutenberg',
+    sourceUrl: 'https://www.gutenberg.org/ebooks/1661'
+  },
+  {
+    id: 8,
+    title: 'الأمير',
+    originalTitle: 'The Prince',
+    author: 'نيكولو مكيافيلي',
+    category: 'الفلسفة',
+    cover: '/covers/8.jpg',
+    rating: null,
+    arabicAvailable: false,
+    year: 1532,
+    source: 'Project Gutenberg',
+    sourceUrl: 'https://www.gutenberg.org/ebooks/1232'
+  },
+  {
+    id: 9,
+    title: 'تأملات ماركوس أوريليوس',
+    originalTitle: 'Thoughts of Marcus Aurelius',
+    author: 'ماركوس أوريليوس',
+    translator: 'George Long',
+    category: 'الفلسفة',
+    cover: '/covers/9.jpg',
+    rating: null,
+    arabicAvailable: false,
+    year: 180,
+    source: 'Project Gutenberg',
+    sourceUrl: 'https://www.gutenberg.org/ebooks/6920'
+  },
+  {
+    id: 10,
+    title: 'الكونت دي مونت كريستو',
+    originalTitle: 'The Count of Monte Cristo',
+    author: 'ألكسندر دوما',
+    category: 'الأدب والروايات',
+    cover: '/covers/10.jpg',
+    rating: null,
+    arabicAvailable: false,
+    year: 1844,
+    source: 'Project Gutenberg',
+    sourceUrl: 'https://www.gutenberg.org/ebooks/1184'
+  },
+  {
+    id: 11,
+    title: 'حول العالم في ثمانين يومًا',
+    originalTitle: 'Around the World in Eighty Days',
+    author: 'جول فيرن',
+    translator: 'George M. Towle',
+    category: 'الأدب والروايات',
+    cover: '/covers/11.png',
+    rating: null,
+    arabicAvailable: false,
+    year: 1872,
+    source: 'Project Gutenberg',
+    sourceUrl: 'https://www.gutenberg.org/ebooks/103'
+  }
 ];
 
 const app = document.querySelector('#app');
@@ -54,7 +134,7 @@ function bookCard(book) {
         </button>
       </div>
       <div class="book-info">
-        <div class="book-rating">★ ${book.rating}</div>
+        ${book.rating ? `<div class="book-rating">★ ${book.rating}</div>` : ""}
         <h3>${book.title}</h3>
         <p>${book.author}</p>
         <button class="small-action" data-book="${book.id}">اكتشف الكتاب <span>←</span></button>
@@ -165,8 +245,11 @@ function renderDetails(book) {
         <span class="eyebrow">${book.category}</span>
         <h1>${book.title}</h1>
         <p>تأليف: ${book.author}</p>
-        <p>التقييم: ★ ${book.rating}</p>
+        ${book.originalTitle ? `<p>العنوان الأصلي: ${book.originalTitle}</p>` : ""}
+        ${book.rating ? `<p>التقييم: ★ ${book.rating}</p>` : ""}
+        ${book.year ? `<p>سنة النشر: ${book.year}</p>` : ""}
         <button class="gold-button" id="addReading">أضف إلى قائمتي القرائية</button>
+        <button class="gold-button" id="openBookReader">اقرأ الكتاب ←</button>
         <p class="notice">تتوفر بيانات تعريفية أولية. سنربط لاحقاً مصادر الكتب وملفات القراءة المرخصة.</p>
       </div>
     </section>
@@ -299,6 +382,37 @@ function bindEvents() {
   document.querySelector('#backBtn')?.addEventListener('click', () => {
     selectedBook = null;
     render();
+  });
+
+  document.querySelector('#openBookReader')?.addEventListener('click', async () => {
+    const button = document.querySelector('#openBookReader');
+    const book = selectedBook;
+
+    if (!book) return;
+
+    button.disabled = true;
+    button.textContent = 'جارٍ تحميل الكتاب...';
+
+    try {
+      const response = await fetch(`/books/${book.id}.txt`);
+
+      if (!response.ok) {
+        throw new Error('لا يوجد نص مرخص لهذا الكتاب حتى الآن.');
+      }
+
+      const text = await response.text();
+
+      if (!text.trim()) {
+        throw new Error('ملف الكتاب فارغ.');
+      }
+
+      openReader({ book, text });
+    } catch (error) {
+      alert(error.message || 'تعذر فتح الكتاب.');
+    } finally {
+      button.disabled = false;
+      button.textContent = 'اقرأ الكتاب ←';
+    }
   });
 
   document.querySelector('#addReading')?.addEventListener('click', () => {

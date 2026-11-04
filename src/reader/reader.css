@@ -1,0 +1,277 @@
+.reader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #e9e4d9;
+  color: #29251f;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.reader-window {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  background: #f5f0e5;
+}
+
+.book-toolbar {
+  flex: 0 0 auto;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 18px;
+  background: #171717;
+  color: #eee5d3;
+  font-family: Arial, sans-serif;
+}
+
+.book-toolbar button {
+  border: 1px solid #766344;
+  background: transparent;
+  color: #e6c78a;
+  border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.book-toolbar .reader-close {
+  font-size: 24px;
+  border: 0;
+  padding: 3px 9px;
+}
+
+.toolbar-title {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-size: 14px;
+  color: #e5d6b9;
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.reader-progress {
+  height: 2px;
+  flex: 0 0 2px;
+  background: #d7c9ae;
+}
+
+.reader-progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: #b18a4c;
+}
+
+.reader-content {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: auto;
+  padding: 48px 22px 100px;
+}
+
+.reader-book {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.book-section {
+  margin: 0 0 48px;
+}
+
+.chapter-heading {
+  margin: 0 0 30px;
+  padding: 0 0 15px;
+  border-bottom: 1px solid #c7b797;
+  color: #795a2e;
+  font-size: 1.55rem;
+  line-height: 1.6;
+  font-weight: 600;
+  text-align: center;
+}
+
+.book-prose,
+.book-section {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.book-section p {
+  margin: 0 0 1.25em;
+  font-size: 1.16rem;
+  line-height: 2;
+  color: #302c25;
+  text-align: justify;
+  overflow-wrap: break-word;
+}
+
+.reader-arabic .reader-book {
+  direction: rtl;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.reader-arabic .chapter-heading {
+  font-family: Arial, sans-serif;
+}
+
+.reader-arabic .book-section p {
+  direction: rtl;
+  text-align: justify;
+  line-height: 2.15;
+  font-family: Arial, sans-serif;
+  font-size: 1.18rem;
+}
+
+.contents-panel {
+  position: absolute;
+  z-index: 5;
+  top: 68px;
+  right: 14px;
+  bottom: 14px;
+  width: min(360px, calc(100% - 28px));
+  overflow-y: auto;
+  background: #fffaf0;
+  border: 1px solid #c9b995;
+  box-shadow: 0 8px 30px #0003;
+  padding: 20px;
+}
+
+.contents-panel[hidden] {
+  display: none;
+}
+
+.contents-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #c9b995;
+  margin-bottom: 12px;
+}
+
+.contents-header h2 {
+  font-size: 19px;
+  color: #795a2e;
+}
+
+.contents-close {
+  border: 0;
+  background: transparent;
+  font-size: 25px;
+}
+
+.toc-entry {
+  display: block;
+  width: 100%;
+  padding: 13px 5px;
+  border: 0;
+  border-bottom: 1px solid #e7dece;
+  background: transparent;
+  color: #302c25;
+  text-align: start;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.reader-dark-paper .reader-window {
+  background: #20201e;
+  color: #e8dfcf;
+}
+
+.reader-dark-paper .book-section p {
+  color: #e1d8c8;
+}
+
+.reader-dark-paper .chapter-heading {
+  color: #d5b77d;
+  border-color: #65543a;
+}
+
+.reader-dark-paper .reader-content {
+  background: #20201e;
+}
+
+.reader-dark-paper .contents-panel {
+  background: #292722;
+  color: #eee3d0;
+}
+
+.reader-dark-paper .toc-entry {
+  color: #eee3d0;
+  border-color: #514a3e;
+}
+
+@media (max-width: 600px) {
+  .book-toolbar {
+    gap: 6px;
+    padding: 7px;
+  }
+
+  .book-toolbar button {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .toolbar-title {
+    font-size: 12px;
+  }
+
+  .reader-content {
+    padding: 30px 20px 80px;
+  }
+
+  .book-section p {
+    font-size: 1.08rem;
+    line-height: 1.95;
+  }
+
+  .reader-arabic .book-section p {
+    font-size: 1.12rem;
+  }
+
+  .chapter-heading {
+    font-size: 1.35rem;
+  }
+}
+
+/* ترقيم صفحات الكتاب */
+.book-page {
+  min-height: calc(100svh - 125px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 24px;
+  margin-bottom: 38px;
+  border-bottom: 1px solid #d8cbb5;
+  scroll-margin-top: 18px;
+}
+
+.book-page-text {
+  flex: 0 0 auto;
+}
+
+.page-number {
+  margin-top: auto;
+  padding-top: 28px;
+  text-align: center;
+  color: #92764d;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  letter-spacing: 2px;
+}
+
+.reader-dark-paper .book-page {
+  border-color: #514a3e;
+}
+
+.reader-dark-paper .page-number {
+  color: #d5b77d;
+}

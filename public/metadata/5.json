@@ -1,0 +1,16 @@
+{
+  "id": 5,
+  "title": "The Art of War",
+  "title_ar": "فن الحرب",
+  "author": "Sun Tzu",
+  "author_ar": "سون تزو",
+  "translator": "Lionel Giles",
+  "category": "الاستراتيجية والفكر العسكري",
+  "language": "en",
+  "year": 1910,
+  "source": "Project Gutenberg",
+  "source_id": "132",
+  "source_url": "https://www.gutenberg.org/ebooks/132",
+  "license_note": "Public domain in the United States; verify local rights before distribution.",
+  "description": "A timeless classic on military strategy, leadership, planning and the art of warfare."
+}

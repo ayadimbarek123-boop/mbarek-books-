@@ -3,3 +3,12 @@ dist/
 .env
 .env.*
 !.env.example
+
+# MBAREK BOOKS - local backups and temporary work
+*.backup
+*.backup-*
+*.before-*
+*.pre-*
+/temp/
+/translation_parts/
+/public/prince-preview.html

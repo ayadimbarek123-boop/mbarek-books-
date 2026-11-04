@@ -1,0 +1,15 @@
+{
+  "id": 7,
+  "title": "The Adventures of Sherlock Holmes",
+  "title_ar": "مغامرات شرلوك هولمز",
+  "author": "Arthur Conan Doyle",
+  "author_ar": "آرثر كونان دويل",
+  "category": "الأدب والروايات",
+  "language": "en",
+  "year": 1892,
+  "source": "Project Gutenberg",
+  "source_id": "1661",
+  "source_url": "https://www.gutenberg.org/ebooks/1661",
+  "license_note": "Public domain in the United States; verify local rights before distribution.",
+  "description": "A celebrated collection of detective stories featuring Sherlock Holmes and Dr. Watson."
+}

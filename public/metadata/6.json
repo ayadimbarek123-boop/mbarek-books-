@@ -1,0 +1,15 @@
+{
+  "id": 6,
+  "title": "Pride and Prejudice",
+  "title_ar": "كبرياء وتحامل",
+  "author": "Jane Austen",
+  "author_ar": "جين أوستن",
+  "category": "روايات وأدب",
+  "language": "en",
+  "year": 1813,
+  "source": "Project Gutenberg",
+  "source_id": "1342",
+  "source_url": "https://www.gutenberg.org/ebooks/1342",
+  "license_note": "Public domain in the United States; verify local rights before distribution.",
+  "description": "A classic novel exploring love, family, social class and personal judgment."
+}
