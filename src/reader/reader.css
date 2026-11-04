@@ -295,3 +295,23 @@
 .reader-overlay.reader-arabic .book-page-text p {
   text-align: justify;
 }
+
+/* Final language direction override */
+.reader-overlay:not(.reader-arabic) .reader-book,
+.reader-overlay:not(.reader-arabic) .book-page,
+.reader-overlay:not(.reader-arabic) .book-page-text,
+.reader-overlay:not(.reader-arabic) .book-page-text p {
+  direction: ltr !important;
+}
+
+.reader-overlay:not(.reader-arabic) .book-page-text p {
+  text-align: justify !important;
+  unicode-bidi: embed;
+}
+
+.reader-overlay.reader-arabic .reader-book,
+.reader-overlay.reader-arabic .book-page,
+.reader-overlay.reader-arabic .book-page-text,
+.reader-overlay.reader-arabic .book-page-text p {
+  direction: rtl !important;
+}
