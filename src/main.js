@@ -24,9 +24,6 @@ const categories = [
 ];
 
 const books = [
-  { id: 1, title: 'مئة عام من العزلة', author: 'غابرييل غارسيا ماركيز', category: 'الأدب والروايات', cover: 'https://covers.openlibrary.org/b/isbn/9780060883287-L.jpg', rating: '4.9' },
-  { id: 2, title: '1984', author: 'جورج أورويل', category: 'الأدب والروايات', cover: 'https://covers.openlibrary.org/b/isbn/9780451524935-L.jpg', rating: '4.8' },
-  { id: 3, title: 'العادات الذرية', author: 'جيمس كلير', category: 'التنمية البشرية', cover: 'https://covers.openlibrary.org/b/isbn/9780735211292-L.jpg', rating: '4.9' },
   { id: 4, title: 'الأب الغني والأب الفقير', author: 'روبرت كيوساكي', category: 'التنمية البشرية', cover: 'https://covers.openlibrary.org/b/isbn/9781612680194-L.jpg', rating: '4.7' },
   { id: 5, title: 'فن الحرب', author: 'سون تزو', category: 'الفلسفة', cover: 'https://covers.openlibrary.org/b/isbn/9781590302255-L.jpg', rating: '4.8' },
   {
@@ -156,6 +153,7 @@ function bookCard(book) {
   `;
 }
 
+
 function renderHome() {
   const filtered = books.filter(book => {
     const matchesCategory = activeCategory === 'الكل' || book.category === activeCategory;
@@ -164,12 +162,13 @@ function renderHome() {
     return matchesCategory && matchesSearch;
   });
 
+
   return `
     <section class="hero">
       <div class="hero-content">
         <span class="eyebrow">عالم المعرفة بين يديك</span>
         <h1>كل كتاب هو<br><span>عالم جديد.</span></h1>
-        <p>اكتشف آلاف الكتب، وانطلق في رحلة لا تنتهي من المعرفة والإلهام.</p>
+        <p>تصفّح 9 كتب مختارة، وانطلق في رحلة من المعرفة والإلهام.</p>
         <button class="gold-button" id="exploreBtn">اكتشف المكتبة <span>←</span></button>
       </div>
       <div class="hero-decoration">
@@ -179,7 +178,7 @@ function renderHome() {
       </div>
     </section>
 
-    <section class="search-section" id="searchArea">
+      <section class="search-section" id="searchArea">
       <div class="section-heading">
         <div>
           <span class="eyebrow">اكتشف ما تبحث عنه</span>
@@ -208,6 +207,8 @@ function renderHome() {
         `).join('')}
       </div>
     </section>
+
+
 
     <section class="books-section" id="featuredBooks">
       <div class="section-heading">

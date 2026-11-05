@@ -22,7 +22,6 @@ body {
   text-align: right;
 }
 
-
 body {
   margin: 0;
   min-width: 320px;
@@ -417,3 +416,207 @@ a { color: inherit; text-decoration: none; }
   .books-grid { grid-template-columns: repeat(4,minmax(0,1fr)); }
 }
 
+
+/* ===== MBAREK BOOKS — REFINED BOOK CARDS ===== */
+
+.books-grid {
+  align-items: stretch;
+  gap: 24px;
+}
+
+.book-card {
+  display: flex;
+  flex-direction: column;
+  padding: 11px;
+  border: 1px solid #292a2c;
+  border-radius: 7px;
+  background: linear-gradient(155deg, #17191d, #101114 75%);
+  box-shadow: 0 7px 22px rgba(0,0,0,.16);
+  overflow: hidden;
+  transition: transform .28s ease, border-color .28s ease,
+              box-shadow .28s ease;
+}
+
+.book-card:hover {
+  transform: translateY(-6px);
+  border-color: #8f713b;
+  box-shadow: 0 15px 32px rgba(0,0,0,.32),
+              0 0 18px rgba(214,177,95,.07);
+}
+
+.book-cover-wrap {
+  width: 100%;
+  aspect-ratio: 3 / 4.2;
+  border-radius: 4px;
+  background: #202126;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.book-cover {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .45s ease;
+}
+
+.book-card:hover .book-cover {
+  transform: scale(1.035);
+}
+
+.favorite-btn {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(9,10,12,.82);
+  backdrop-filter: blur(8px);
+  transition: background .2s ease, transform .2s ease;
+}
+
+.favorite-btn:hover {
+  transform: scale(1.08);
+  background: #24201a;
+}
+
+.book-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 13px 3px 4px;
+  min-width: 0;
+}
+
+.book-rating {
+  min-height: 19px;
+  letter-spacing: .5px;
+}
+
+.book-info h3 {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.7;
+  margin: 7px 0 4px;
+  min-height: 3.2em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.book-info p {
+  line-height: 1.8;
+  min-height: 1.8em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.small-action {
+  margin-top: auto;
+  padding: 10px 7px;
+  border-radius: 3px;
+  transition: background .2s ease, color .2s ease;
+}
+
+.small-action:hover {
+  background: var(--gold);
+  color: #17130a;
+}
+
+.category-chip {
+  transition: background .2s ease, border-color .2s ease,
+              color .2s ease;
+}
+
+.search-box {
+  border-radius: 6px;
+  transition: border-color .2s ease;
+}
+
+.search-box:focus-within {
+  border-color: #92743d;
+}
+
+@media (min-width: 751px) {
+  .books-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 25px;
+  }
+}
+
+@media (max-width: 750px) {
+  .books-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .book-card {
+    padding: 8px;
+  }
+
+  .book-info {
+    padding-top: 10px;
+  }
+
+  .book-info h3 {
+    font-size: 13px;
+  }
+
+  .book-info p {
+    font-size: 11px;
+  }
+
+  .small-action {
+    font-size: 11px;
+    padding: 9px 5px;
+  }
+}
+
+@media (max-width: 360px) {
+  .books-grid {
+    gap: 10px;
+  }
+
+  .book-card {
+    padding: 6px;
+  }
+
+  .book-info h3 {
+    font-size: 12px;
+  }
+}
+
+
+/* ===== DISCOVERY SECTIONS ===== */
+.discovery-section {
+  padding-top: 25px;
+  padding-bottom: 25px;
+}
+
+.discovery-section .section-heading {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.discovery-section .book-card {
+  position: relative;
+}
+
+.discovery-section .section-heading h2 {
+  font-size: 24px;
+}
+
+@media (max-width: 750px) {
+  .discovery-section {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .discovery-section .section-heading h2 {
+    font-size: 20px;
+  }
+}
