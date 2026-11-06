@@ -1,8 +1,8 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  font-family: 'Cairo', sans-serif;
+  font-family: 'Inter', sans-serif;
   color: #f4f0e7;
   background: #090a0c;
   --gold: #d6b15f;
@@ -14,12 +14,12 @@
 * { box-sizing: border-box; }
 
 html {
-  direction: rtl;
+  direction: ltr;
 }
 
 body {
-  direction: rtl;
-  text-align: right;
+  direction: ltr;
+  text-align: left;
 }
 
 body {
@@ -619,4 +619,678 @@ a { color: inherit; text-decoration: none; }
   .discovery-section .section-heading h2 {
     font-size: 20px;
   }
+}
+
+/* ===== BOOK SORT CONTROL ===== */
+.books-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sort-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 16px;
+  border: 1px solid rgba(214, 177, 95, 0.4);
+  border-radius: 9px;
+  background: rgba(214, 177, 95, 0.08);
+  color: #d6b15f;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.25s ease, border-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.sort-button:hover {
+  background: rgba(214, 177, 95, 0.16);
+  border-color: #d6b15f;
+  transform: translateY(-2px);
+}
+
+.sort-button:focus-visible {
+  outline: 2px solid #d6b15f;
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .books-tools {
+    gap: 9px;
+  }
+
+  .sort-button {
+    padding: 9px 11px;
+    font-size: 11px;
+  }
+}
+
+
+/* MBAREK BOOKS — English LTR layout */
+html, body, #app {
+  direction: ltr;
+  text-align: left;
+}
+
+input, textarea, select {
+  direction: ltr;
+  text-align: left;
+}
+
+.category-list {
+  direction: ltr;
+}
+
+.books-grid {
+  direction: ltr;
+}
+
+button, a {
+  direction: ltr;
+}
+
+@media (max-width: 700px) {
+  .topbar {
+    direction: ltr;
+  }
+
+  .hero {
+    direction: ltr;
+  }
+
+  .section-heading {
+    direction: ltr;
+  }
+}
+
+/* ===== FINAL ENGLISH LTR POLISH ===== */
+
+html,
+body,
+#app {
+  direction: ltr !important;
+  text-align: left;
+}
+
+body {
+  unicode-bidi: isolate;
+}
+
+.topbar,
+.desktop-nav,
+.mobile-nav,
+.hero,
+.hero-content,
+.section-heading,
+.details,
+.search-box,
+.category-list,
+.books-grid {
+  direction: ltr;
+}
+
+.hero-content,
+.page-title,
+.book-info,
+.details,
+.section-heading {
+  text-align: left;
+}
+
+.favorite-btn {
+  right: auto;
+  left: 9px;
+}
+
+.hero-decoration {
+  right: auto;
+  left: auto;
+}
+
+.search-box input {
+  text-align: left;
+  direction: ltr;
+}
+
+.back-btn {
+  direction: ltr;
+  text-align: left;
+}
+
+@media (max-width: 750px) {
+  .hero-decoration {
+    right: auto;
+    left: -110px;
+  }
+
+  .mobile-nav {
+    direction: ltr;
+  }
+
+  .details {
+    direction: ltr;
+  }
+}
+
+/* English typography */
+:root {
+  font-family: 'Inter', sans-serif;
+}
+
+button,
+input,
+textarea {
+  font-family: 'Inter', sans-serif;
+}
+
+/* ===== MOBILE HERO AND NAVIGATION REFINEMENT ===== */
+@media (max-width: 750px) {
+  .hero {
+    min-height: auto;
+    padding: 34px 0 40px;
+    align-items: flex-start;
+  }
+
+  .hero-content {
+    width: 100%;
+    max-width: 100%;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero h1 {
+    font-size: clamp(38px, 10.5vw, 45px);
+    line-height: 1.2;
+    letter-spacing: -1.5px;
+    margin: 20px 0 18px;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .hero h1 br {
+    display: none;
+  }
+
+  .hero h1 span {
+    display: block;
+    margin-top: 4px;
+  }
+
+  .hero p {
+    font-size: 16px;
+    line-height: 1.75;
+    margin: 0;
+    max-width: 100%;
+  }
+
+  .hero .gold-button {
+    margin-top: 24px;
+    max-width: 100%;
+  }
+
+  .hero-decoration {
+    pointer-events: none;
+    opacity: .10;
+  }
+
+  .search-section {
+    margin-top: 24px;
+  }
+
+  .main-content {
+    padding-bottom: 105px;
+  }
+
+  .mobile-nav {
+    height: 68px;
+    padding-bottom: env(safe-area-inset-bottom);
+    box-sizing: content-box;
+  }
+
+  .mobile-nav button {
+    min-width: 0;
+    flex: 1;
+  }
+}
+
+/* ===== CENTERED MOBILE BRAND WATERMARK ===== */
+@media (max-width: 750px) {
+  .hero-decoration {
+    left: 50% !important;
+    right: auto !important;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 280px;
+    height: 280px;
+    opacity: 0.09;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .hero-circle {
+    width: 240px;
+    height: 240px;
+  }
+
+  .hero-book {
+    font-size: 150px;
+    line-height: 1;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .decoration-text {
+    display: none;
+  }
+}
+
+/* ===== MBAREK BOOKS — COMPACT MOBILE LAYOUT ===== */
+@media (max-width: 750px) {
+  .main-content {
+    width: 92%;
+    padding-bottom: 0;
+  }
+
+  .hero {
+    min-height: 0;
+    padding: 22px 0 18px;
+    align-items: center;
+    position: relative;
+  }
+
+  .hero-content {
+    width: 100%;
+    max-width: 100%;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero h1 {
+    font-size: clamp(35px, 9vw, 42px);
+    line-height: 1.15;
+    letter-spacing: -1.2px;
+    margin: 12px 0;
+  }
+
+  .hero p {
+    max-width: 440px;
+    font-size: 15px;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .hero .gold-button {
+    margin-top: 16px;
+  }
+
+  .hero-decoration {
+    position: absolute;
+    left: 50% !important;
+    top: 50%;
+    right: auto !important;
+    transform: translate(-50%, -50%);
+    width: 230px;
+    height: 230px;
+    opacity: .065;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .hero-circle {
+    width: 205px;
+    height: 205px;
+  }
+
+  .hero-book {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 130px;
+    line-height: 1;
+  }
+
+  .decoration-text {
+    display: none;
+  }
+
+  .search-section {
+    margin-top: 0;
+    padding: 18px 0 10px;
+  }
+
+  .categories-section,
+  .books-section {
+    padding: 18px 0;
+  }
+
+  .section-heading {
+    margin-bottom: 13px;
+    gap: 10px;
+  }
+
+  .section-heading h2 {
+    font-size: 20px;
+  }
+
+  .search-box {
+    height: 52px;
+  }
+
+  .books-grid {
+    gap: 13px;
+  }
+
+  .mobile-nav {
+    height: 64px;
+  }
+}
+
+/* Legacy founder hero styles removed: portrait is in footer only. */
+
+/* ===== MBAREK BOOKS — FOUNDER SIGNATURE FOOTER ===== */
+.footer {
+  margin-top: 75px;
+  padding: 42px 7% 22px;
+  border-top: 1px solid rgba(214,177,95,.35);
+  background: linear-gradient(180deg, #111215 0%, #090a0c 100%);
+  color: #aaa9a5;
+  text-align: left;
+}
+
+.footer-signature {
+  max-width: 1150px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 35px;
+  padding-bottom: 35px;
+}
+
+.footer-founder {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+}
+
+.footer-portrait {
+  width: 76px;
+  height: 92px;
+  object-fit: cover;
+  object-position: center 25%;
+  filter: grayscale(100%);
+  border: 1px solid rgba(214,177,95,.55);
+  border-radius: 4px;
+}
+
+.footer-founder-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.footer-label {
+  color: #a88a50;
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+
+.footer-founder-info strong {
+  color: #eeeae1;
+  font-size: 17px;
+  letter-spacing: 1.5px;
+}
+
+.footer-role {
+  color: #99958c;
+  font-size: 12px;
+}
+
+.footer-message {
+  text-align: right;
+}
+
+.footer-brand {
+  color: #eeeae1;
+  font-size: 23px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.footer-message p {
+  margin: 9px 0 5px;
+  color: #d6b15f;
+  font-size: 14px;
+}
+
+.footer-message > span {
+  color: #77777b;
+  font-size: 11px;
+}
+
+.footer-bottom {
+  max-width: 1150px;
+  margin: auto;
+  padding-top: 19px;
+  border-top: 1px solid #29282a;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  color: #77777b;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+
+@media (max-width: 750px) {
+  .footer {
+    padding: 32px 5% 85px;
+  }
+
+  .footer-signature {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+  }
+
+  .footer-portrait {
+    width: 66px;
+    height: 82px;
+  }
+
+  .footer-message {
+    text-align: left;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* ===== MBAREK BOOKS — REAL LIBRARY HERO ===== */
+.hero {
+  min-height: 480px;
+  padding: 55px 5%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg,
+      rgba(5, 6, 8, .96) 0%,
+      rgba(5, 6, 8, .82) 38%,
+      rgba(5, 6, 8, .30) 72%,
+      rgba(5, 6, 8, .18) 100%),
+    linear-gradient(0deg, rgba(5, 6, 8, .45), transparent 45%),
+    url("/mbarek-books-/images/library-hall.jpg") center 48% / cover no-repeat;
+  border-bottom: 1px solid rgba(214, 177, 95, .45);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 560px;
+  text-shadow: 0 3px 20px rgba(0, 0, 0, .9);
+}
+
+.hero h1 {
+  color: #f4f1e9;
+}
+
+.hero h1 span {
+  color: #d6b15f;
+  text-shadow: 0 0 28px rgba(214, 177, 95, .25);
+}
+
+.gold-button {
+  position: relative;
+  z-index: 3;
+  box-shadow: 0 5px 24px rgba(190, 132, 43, .25);
+}
+
+@media (max-width: 750px) {
+  .hero {
+    min-height: 390px;
+    padding: 38px 5%;
+    background:
+      linear-gradient(90deg, rgba(5, 6, 8, .88), rgba(5, 6, 8, .48)),
+      linear-gradient(0deg, rgba(5, 6, 8, .48), transparent),
+      url("/mbarek-books-/images/library-hall.jpg") 62% center / cover no-repeat;
+  }
+
+  .hero-content {
+    max-width: 100%;
+  }
+}
+
+/* ===== MBAREK BOOKS — ALL DEVICES RESPONSIVE SYSTEM ===== */
+
+.hero {
+  width: 100%;
+  min-height: clamp(360px, 48vw, 620px);
+  padding: clamp(28px, 5vw, 72px) clamp(20px, 6vw, 90px);
+  box-sizing: border-box;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center 48%;
+}
+
+.hero-content {
+  width: min(100%, 620px);
+  max-width: 620px;
+  min-width: 0;
+}
+
+.hero h1 {
+  font-size: clamp(34px, 5.5vw, 76px);
+  line-height: 1.16;
+  overflow-wrap: break-word;
+}
+
+.hero p {
+  max-width: 55ch;
+  line-height: 1.7;
+}
+
+.hero .gold-button {
+  max-width: 100%;
+  box-sizing: border-box;
+  white-space: normal;
+}
+
+/* Tablets and compact laptops */
+@media (min-width: 751px) and (max-width: 1100px) {
+  .hero {
+    min-height: 440px;
+    padding: 45px 5%;
+    background-position: 58% center;
+  }
+
+  .hero-content {
+    max-width: 540px;
+  }
+
+  .hero h1 {
+    font-size: clamp(42px, 6vw, 62px);
+  }
+}
+
+/* Phones */
+@media (max-width: 750px) {
+  .hero {
+    width: 100%;
+    min-height: 380px;
+    padding: 34px 6%;
+    align-items: center;
+    background-position: 62% center;
+    background-size: cover;
+  }
+
+  .hero-content {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .hero h1 {
+    font-size: clamp(32px, 8vw, 44px);
+    line-height: 1.2;
+    letter-spacing: -1px;
+  }
+
+  .hero p {
+    max-width: 42ch;
+    font-size: clamp(14px, 3.8vw, 16px);
+    line-height: 1.65;
+  }
+
+  .hero .gold-button {
+    min-height: 46px;
+    padding: 12px 20px;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+  .hero {
+    min-height: 350px;
+    padding: 28px 5%;
+    background-position: 65% center;
+  }
+
+  .hero h1 {
+    font-size: 32px;
+  }
+
+  .hero .gold-button {
+    font-size: 13px;
+    padding: 11px 15px;
+  }
+}
+
+/* Short screens in landscape orientation */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero {
+    min-height: 340px;
+    padding-top: 25px;
+    padding-bottom: 25px;
+  }
+}
+
+/* Prevent accidental horizontal overflow */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
 }

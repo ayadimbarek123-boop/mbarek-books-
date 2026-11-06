@@ -2,6 +2,7 @@
 
 import './style.css';
 import { openReader, openPdfReader } from './reader/reader.js';
+import { books } from './data/books.js';
 
 const icons = {
   home: '⌂',
@@ -17,114 +18,16 @@ const icons = {
   menu: '☰'
 };
 
-const categories = [
-  'الكل', 'الأدب والروايات', 'التاريخ', 'الفلسفة',
-  'العلوم', 'التكنولوجيا', 'التنمية البشرية',
-  'الدين', 'علم النفس'
-];
+const categoryLabel = category => category || 'Uncategorized';
+const categories = ['All', ...new Set(books.map(book => book.category).filter(Boolean))];
 
-const books = [
-  { id: 4, title: 'الأب الغني والأب الفقير', author: 'روبرت كيوساكي', category: 'التنمية البشرية', cover: 'https://covers.openlibrary.org/b/isbn/9781612680194-L.jpg', rating: '4.7' },
-  { id: 5, title: 'فن الحرب', author: 'سون تزو', category: 'الفلسفة', cover: 'https://covers.openlibrary.org/b/isbn/9781590302255-L.jpg', rating: '4.8' },
-  {
-    id: 6,
-    title: 'كبرياء وتحامل',
-    originalTitle: 'Pride and Prejudice',
-    author: 'جين أوستن',
-    category: 'الأدب والروايات',
-    cover: '/covers/6.jpg',
-    rating: null,
-    arabicAvailable: false,
-    year: 1813,
-    source: 'Project Gutenberg',
-    sourceUrl: 'https://www.gutenberg.org/ebooks/1342'
-  },
-  {
-    id: 7,
-    title: 'مغامرات شرلوك هولمز',
-    originalTitle: 'The Adventures of Sherlock Holmes',
-    author: 'آرثر كونان دويل',
-    category: 'الأدب والروايات',
-    cover: '/covers/7.jpg',
-    rating: null,
-    arabicAvailable: false,
-    year: 1892,
-    source: 'Project Gutenberg',
-    sourceUrl: 'https://www.gutenberg.org/ebooks/1661'
-  },
-  {
-    id: 8,
-    title: 'الأمير',
-    originalTitle: 'The Prince',
-    author: 'نيكولو مكيافيلي',
-    category: 'الفلسفة',
-    cover: '/covers/8.jpg',
-    rating: null,
-    arabicAvailable: false,
-    year: 1532,
-    source: 'Project Gutenberg',
-    sourceUrl: 'https://www.gutenberg.org/ebooks/1232'
-  },
-  {
-    id: 9,
-    title: 'تأملات ماركوس أوريليوس',
-    originalTitle: 'Thoughts of Marcus Aurelius',
-    author: 'ماركوس أوريليوس',
-    translator: 'George Long',
-    category: 'الفلسفة',
-    cover: '/covers/9.jpg',
-    rating: null,
-    arabicAvailable: false,
-    year: 180,
-    source: 'Project Gutenberg',
-    sourceUrl: 'https://www.gutenberg.org/ebooks/6920'
-  },
-  {
-    id: 10,
-    title: 'الكونت دي مونت كريستو',
-    originalTitle: 'The Count of Monte Cristo',
-    author: 'ألكسندر دوما',
-    category: 'الأدب والروايات',
-    cover: '/covers/10.jpg',
-    rating: null,
-    arabicAvailable: false,
-    year: 1844,
-    source: 'Project Gutenberg',
-    sourceUrl: 'https://www.gutenberg.org/ebooks/1184'
-  },
-  {
-    id: 11,
-    title: 'حول العالم في ثمانين يومًا',
-    originalTitle: 'Around the World in Eighty Days',
-    author: 'جول فيرن',
-    translator: 'George M. Towle',
-    category: 'الأدب والروايات',
-    cover: '/covers/11.png',
-    rating: null,
-    arabicAvailable: false,
-    year: 1872,
-    source: 'Project Gutenberg',
-    sourceUrl: 'https://www.gutenberg.org/ebooks/103'
-  },
-  {
-    id: 12,
-    title: 'أليس في بلاد العجائب',
-    originalTitle: "Alice's Adventures in Wonderland",
-    author: 'لويس كارول',
-    category: 'الأدب والروايات والخيال',
-    cover: '/covers/12.jpg',
-    rating: null,
-    arabicAvailable: false,
-    year: 1865,
-    source: 'Project Gutenberg',
-    sourceUrl: 'https://www.gutenberg.org/ebooks/11'
-  }
-];
+
 
 const app = document.querySelector('#app');
 
-let activeCategory = 'الكل';
+let activeCategory = 'All';
 let searchQuery = '';
+let sortOrder = 'default';
 let activePage = 'home';
 let favorites = JSON.parse(localStorage.getItem('mbarekFavorites') || '[]');
 let readingList = JSON.parse(localStorage.getItem('mbarekReading') || '[]');
@@ -139,15 +42,15 @@ function bookCard(book) {
         <img class="book-cover" src="${book.cover}" alt="${book.title}"
           onerror="this.src='https://placehold.co/300x430/151515/D6B15F?text=BOOK'">
         <button class="favorite-btn ${favorite ? 'active' : ''}"
-          data-favorite="${book.id}" aria-label="إضافة للمفضلة">
+          data-favorite="${book.id}" aria-label="Add to favorites">
           ${favorite ? '♥' : '♡'}
         </button>
       </div>
       <div class="book-info">
-        ${book.rating ? `<div class="book-rating">★ ${book.rating}</div>` : ""}
+        ${book.rating ? `<div class="book-rating">★ ${book.rating} <small>${book.ratingVerified ? "Verified" : "Unverified"}</small></div>` : ""}
         <h3>${book.title}</h3>
         <p>${book.author}</p>
-        <button class="small-action" data-book="${book.id}">اكتشف الكتاب <span>←</span></button>
+        <button class="small-action" data-book="${book.id}">Discover book <span>←</span></button>
       </div>
     </article>
   `;
@@ -156,54 +59,57 @@ function bookCard(book) {
 
 function renderHome() {
   const filtered = books.filter(book => {
-    const matchesCategory = activeCategory === 'الكل' || book.category === activeCategory;
-    const matchesSearch = `${book.title} ${book.author} ${book.category}`
+    const matchesCategory = activeCategory === 'All' || book.category === activeCategory;
+    const matchesSearch = `${book.title} ${book.titleAr || ''} ${book.author} ${book.authorAr || ''} ${categoryLabel(book.category)}`
       .toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
+  const sorted = [...filtered];
+  if (sortOrder === 'rating') {
+    sorted.sort((a, b) => {
+      const verifiedOrder = Number(Boolean(b.ratingVerified)) - Number(Boolean(a.ratingVerified));
+      if (verifiedOrder !== 0) return verifiedOrder;
+      return (Number(b.rating) || 0) - (Number(a.rating) || 0);
+    });
+  }
 
   return `
     <section class="hero">
       <div class="hero-content">
-        <span class="eyebrow">عالم المعرفة بين يديك</span>
-        <h1>كل كتاب هو<br><span>عالم جديد.</span></h1>
-        <p>تصفّح 9 كتب مختارة، وانطلق في رحلة من المعرفة والإلهام.</p>
-        <button class="gold-button" id="exploreBtn">اكتشف المكتبة <span>←</span></button>
-      </div>
-      <div class="hero-decoration">
-        <div class="hero-circle"></div>
-        <div class="hero-book">M</div>
-        <span class="decoration-text">KNOWLEDGE IS POWER</span>
+
+        <h1>Every book is a<br><span>new world.</span></h1>
+
+        <button class="gold-button" id="exploreBtn">Explore the library <span>←</span></button>
       </div>
     </section>
 
       <section class="search-section" id="searchArea">
       <div class="section-heading">
         <div>
-          <span class="eyebrow">اكتشف ما تبحث عنه</span>
-          <h2>ابحث في المكتبة</h2>
+
+          <h2>Search the library</h2>
         </div>
       </div>
       <div class="search-box">
         <span class="search-icon">⌕</span>
         <input id="bookSearch" value="${escapeHTML(searchQuery)}"
-          placeholder="اسم الكتاب، المؤلف، أو الموضوع..." />
-        <button id="searchBtn">بحث</button>
+          placeholder="Book title, author, or topic..." />
+        <button id="searchBtn">Search</button>
       </div>
     </section>
 
     <section class="categories-section">
       <div class="section-heading">
         <div>
-          <span class="eyebrow">تصفح حسب اهتمامك</span>
-          <h2>أقسام المكتبة</h2>
+
+          <h2>Library categories</h2>
         </div>
       </div>
       <div class="category-list">
         ${categories.map(cat => `
           <button class="category-chip ${activeCategory === cat ? 'selected' : ''}"
-            data-category="${cat}">${cat}</button>
+            data-category="${cat}">${categoryLabel(cat)}</button>
         `).join('')}
       </div>
     </section>
@@ -213,22 +119,23 @@ function renderHome() {
     <section class="books-section" id="featuredBooks">
       <div class="section-heading">
         <div>
-          <span class="eyebrow">اختياراتنا لك</span>
-          <h2>${searchQuery ? 'نتائج البحث' : 'كتب تستحق القراءة'}</h2>
+
+          <h2>${searchQuery ? 'Search results' : 'Books worth reading'}</h2>
         </div>
-        <span class="result-count">${filtered.length} كتب</span>
+        <div class="books-tools">
+          <span class="result-count">${filtered.length} books</span>
+          <button class="sort-button" id="sortBooks" type="button">
+            ${sortOrder === 'rating' ? '↕ Default order' : '★ Top rated'}
+          </button>
+        </div>
       </div>
       <div class="books-grid">
-        ${filtered.length ? filtered.map(bookCard).join('') :
-          '<div class="empty-state">لم نعثر على كتب مطابقة. جرّب كلمات أخرى.</div>'}
+        ${sorted.length ? sorted.map(bookCard).join('') :
+          '<div class="empty-state">No matching books found. Try different keywords.</div>'}
       </div>
     </section>
 
-    <section class="quote-section">
-      <span>✦</span>
-      <p>الكتاب نافذة نطل منها على العالم.</p>
-      <small>MBAREK BOOKS</small>
-    </section>
+
   `;
 }
 
@@ -239,34 +146,38 @@ function renderPersonalPage() {
 
   return `
     <section class="page-title">
-      <span class="eyebrow">مساحتك الخاصة</span>
-      <h1>${activePage === 'favorites' ? 'كتبي المفضلة' : 'قائمتي القرائية'}</h1>
-      <p>احتفظ بكتبك المفضلة وتابع رحلتك المعرفية.</p>
+      <span class="eyebrow">Your personal space</span>
+      <h1>${activePage === 'favorites' ? 'My favorites' : 'My reading list'}</h1>
+      <p>Save your favorite books and follow your reading journey.</p>
     </section>
     <div class="books-grid">
       ${list.length ? list.map(bookCard).join('') :
-        '<div class="empty-state">لا توجد كتب هنا بعد. اكتشف الكتب وأضف ما يعجبك.</div>'}
+        '<div class="empty-state">There are no books here yet. Explore the library and add your favorites.</div>'}
     </div>
   `;
 }
 
 function renderDetails(book) {
   return `
-    <button class="back-btn" id="backBtn">→ العودة إلى المكتبة</button>
+    <button class="back-btn" id="backBtn">→ Back to library</button>
     <section class="details">
       <img src="${book.cover}" alt="${book.title}" onerror="this.style.display='none'">
       <div>
-        <span class="eyebrow">${book.category}</span>
+        <span class="eyebrow">${categoryLabel(book.category)}</span>
         <h1>${book.title}</h1>
-        <p>تأليف: ${book.author}</p>
-        ${book.originalTitle ? `<p>العنوان الأصلي: ${book.originalTitle}</p>` : ""}
-        ${book.rating ? `<p>التقييم: ★ ${book.rating}</p>` : ""}
-        ${book.year ? `<p>سنة النشر: ${book.year}</p>` : ""}
-        <button class="gold-button" id="addReading">أضف إلى قائمتي القرائية</button>
-        <button class="gold-button" id="openBookReader">اقرأ الكتاب ←</button>
-        ${book.id === 1 ? '<a class="gold-button" href="https://openlibrary.org/books/OL22752164M/One_hundred_years_of_solitude" target="_blank" rel="noopener noreferrer" style="display:inline-block;text-decoration:none">استعارة الكتاب من Open Library ↗</a>' : ""}
-        ${book.id === 4 ? '<button class="gold-button" id="chooseLocalPdf" type="button">اختيار نسخة PDF من الهاتف</button><input id="localPdfInput" type="file" accept="application/pdf,.pdf" hidden>' : ""}
-        <p class="notice">بيانات الكتاب متاحة، استمتع بتجربة القراءة الرقمية من مكتبتك.</p>
+        <p>By: ${book.author}</p>
+        ${book.originalTitle ? `<p>Original title: ${book.originalTitle}</p>` : ""}
+        ${book.rating ? `<p>Rating: ★ ${book.rating} — ${book.ratingVerified ? "Verified by Goodreads" : "Unverified"}</p>` : ""}
+        ${book.year ? `<p>Publication year: ${book.year}</p>` : ""}
+        <button class="gold-button" id="addReading">Add to my reading list</button>
+        ${book.textUrl
+          ? '<button class="gold-button" id="openBookReader">Read book ←</button>'
+          : book.externalReadUrl
+            ? `<a class="gold-button" href="${escapeHTML(book.externalReadUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;text-decoration:none">Read from source ↗</a>`
+            : '<p class="notice">The reading edition is currently unavailable.</p>'}
+        ${book.id === 1 ? '<a class="gold-button" href="https://openlibrary.org/books/OL22752164M/One_hundred_years_of_solitude" target="_blank" rel="noopener noreferrer" style="display:inline-block;text-decoration:none">Borrow from Open Library ↗</a>' : ""}
+        ${book.id === 4 ? '<button class="gold-button" id="chooseLocalPdf" type="button">Choose a PDF from your device</button><input id="localPdfInput" type="file" accept="application/pdf,.pdf" hidden>' : ""}
+        <p class="notice">Book details are available. Enjoy your digital reading experience.</p>
       </div>
     </section>
   `;
@@ -293,25 +204,42 @@ function render() {
         <span>MBAREK <b>BOOKS</b><small>YOUR DIGITAL LIBRARY</small></span>
       </a>
       <nav class="desktop-nav">
-        <button data-page="home" class="${activePage === 'home' ? 'nav-active' : ''}">الرئيسية</button>
-        <button data-page="reading" class="${activePage === 'reading' ? 'nav-active' : ''}">قائمتي القرائية</button>
-        <button data-page="favorites" class="${activePage === 'favorites' ? 'nav-active' : ''}">المفضلة</button>
+        <button data-page="home" class="${activePage === 'home' ? 'nav-active' : ''}">Home</button>
+        <button data-page="reading" class="${activePage === 'reading' ? 'nav-active' : ''}">My reading list</button>
+        <button data-page="favorites" class="${activePage === 'favorites' ? 'nav-active' : ''}">Favorites</button>
       </nav>
-      <button class="header-search" id="headerSearch">⌕ <span>ابحث عن كتاب</span></button>
+      <button class="header-search" id="headerSearch">⌕ <span>Find a book</span></button>
     </header>
 
     <main class="main-content">${content}</main>
 
     <footer class="footer">
-      <div class="footer-brand">MBAREK <b>BOOKS</b></div>
-      <p>المعرفة تبدأ من صفحة.</p>
-      <span>© 2026 MBAREK BOOKS</span>
+      <div class="footer-signature">
+        <div class="footer-founder">
+          <img src="${import.meta.env.BASE_URL}images/mbarek-portrait.jpg" alt="Mbarek Ayadi" class="footer-portrait">
+          <div class="footer-founder-info">
+            <span class="footer-label">FOUNDED & CREATED BY</span>
+            <strong>MBAREK AYADI</strong>
+            <span class="footer-role">Founder & Creator</span>
+          </div>
+        </div>
+
+        <div class="footer-message">
+          <p>Knowledge begins with a page.</p>
+          <span>Built with passion by Mbarek Ayadi.</span>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 MBAREK BOOKS</span>
+        <span>AN INDEPENDENT DIGITAL LIBRARY</span>
+      </div>
     </footer>
 
     <nav class="mobile-nav">
-      <button data-page="home"><span>⌂</span>الرئيسية</button>
-      <button data-page="reading"><span>▤</span>مكتبتي</button>
-      <button data-page="favorites"><span>♡</span>المفضلة</button>
+      <button data-page="home"><span>⌂</span>Home</button>
+      <button data-page="reading"><span>▤</span>My Library</button>
+      <button data-page="favorites"><span>♡</span>Favorites</button>
     </nav>
   `;
 
@@ -336,7 +264,8 @@ function bindEvents() {
   });
 
   document.querySelectorAll('[data-favorite]').forEach(button => {
-    button.addEventListener('click', () => {
+    button.addEventListener('click', event => {
+      event.stopPropagation();
       const id = Number(button.dataset.favorite);
       favorites = favorites.includes(id)
         ? favorites.filter(item => item !== id)
@@ -347,11 +276,17 @@ function bindEvents() {
   });
 
   document.querySelectorAll('[data-book]').forEach(button => {
-    button.addEventListener('click', () => {
+    button.addEventListener('click', event => {
+      event.stopPropagation();
       selectedBook = books.find(book => book.id === Number(button.dataset.book));
       render();
       window.scrollTo(0, 0);
     });
+  });
+
+  document.querySelector('#sortBooks')?.addEventListener('click', () => {
+    sortOrder = sortOrder === 'rating' ? 'default' : 'rating';
+    render();
   });
 
   const search = document.querySelector('#bookSearch');
@@ -411,7 +346,7 @@ function bindEvents() {
       if (!file) return;
 
       if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-        alert('الرجاء اختيار ملف PDF صالح.');
+        alert('Please select a valid PDF file.');
         localPdfInput.value = '';
         return;
       }
@@ -428,20 +363,20 @@ function bindEvents() {
     if (!book) return;
 
     button.disabled = true;
-    button.textContent = 'جارٍ تحميل الكتاب...';
+    button.textContent = 'Loading book...';
 
     try {
-      const response = await fetch(`/books/${book.id}.txt`);
+      const response = await fetch(book.textUrl || `${import.meta.env.BASE_URL}books/${book.id}.txt`);
 
       if (!response.ok) {
-        throw new Error('لا يوجد نص متاح لهذا الكتاب حتى الآن.');
+        throw new Error('The book text is not available yet.');
       }
 
       const contentType = (response.headers.get('content-type') || '').toLowerCase();
       const text = await response.text();
 
       if (!text.trim()) {
-        throw new Error('ملف الكتاب فارغ.');
+        throw new Error('The book file is empty.');
       }
 
       const isHtml =
@@ -449,15 +384,15 @@ function bindEvents() {
         /^\uFEFF?\s*(?:<!doctype\s+html|<html[\s>]|<(?:head|body|script|iframe)[\s>])/i.test(text);
 
       if (isHtml) {
-        throw new Error('تعذر فتح الكتاب: المصدر أعاد صفحة ويب بدل نص الكتاب.');
+        throw new Error('Unable to open the book: the source returned a web page instead of book text.');
       }
 
       openReader({ book, text });
     } catch (error) {
-      alert(error.message || 'تعذر فتح الكتاب.');
+      alert(error.message || 'Unable to open the book.');
     } finally {
       button.disabled = false;
-      button.textContent = 'اقرأ الكتاب ←';
+      button.textContent = 'Read book ←';
     }
   });
 
@@ -466,7 +401,7 @@ function bindEvents() {
       readingList.push(selectedBook.id);
       localStorage.setItem('mbarekReading', JSON.stringify(readingList));
     }
-    alert('تمت إضافة الكتاب إلى قائمتك القرائية');
+    alert('Book added to your reading list.');
   });
 }
 

@@ -1,5 +1,4 @@
 import './reader.css';
-import { translateText } from './translator.js';
 
 const STORAGE_KEY = 'mbarekReaderProgress';
 
@@ -18,24 +17,18 @@ function savedProgress(id) {
   }
 }
 
-function saveProgress(id, language, position) {
+function saveProgress(id, position) {
   try {
     const all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
     const entry = all[id] || {};
-    entry[language === 'en' ? 'enScroll' : 'arScroll'] = position;
+    entry.enScroll = position;
     all[id] = entry;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
   } catch {}
 }
 
-function isChapterHeading(value, language) {
+function isChapterHeading(value) {
   const line = value.trim();
-
-  if (language === 'ar') {
-    return /^(الفصل|الباب)\s/.test(line) ||
-      /^(المقدمة|الخاتمة)\s*$/.test(line);
-  }
-
   return /^(?:CHAPTER\s+[IVXLCDM]+\.?\s*.*|[IVXLCDM]+\.\s+[A-Z][A-Z\s,'’:\-–Œ]+)$/i.test(line);
 }
 
@@ -43,62 +36,50 @@ function cleanParagraph(value) {
   return value
     .replace(/\s+/g, ' ')
     .replace(/^\s*\d+(?:\s*,\s*\d+)*\.\s+/, '')
-    .replace(/^\s*[٠-٩]+(?:\s*,\s*[٠-٩]+)*\.\s+/, '')
     .replace(/\[Illustration\]/gi, '')
     .replace(/(^|\s)_([^_]+)_(?=\s|[.,!?;:]|$)/g, '$1$2')
     .replace(/\s+([,.;!?])/g, '$1')
     .trim();
 }
+
 function extractGutenbergBody(text) {
   const source = String(text).replace(/\r/g, '');
-
   const start = source.match(/^[ \t]*\*{3}[ \t]*START OF THE PROJECT GUTENBERG EBOOK\b[^\r\n]*\*{3}[ \t]*$/im);
   const end = source.match(/^[ \t]*\*{3}[ \t]*END OF THE PROJECT GUTENBERG EBOOK\b[^\r\n]*\*{3}[ \t]*$/im);
 
   if (start && end && end.index > start.index) {
     return source.slice(start.index + start[0].length, end.index);
   }
-
   return source;
 }
 
-function buildBook(text, language) {
+function buildBook(text) {
   const blocks = extractGutenbergBody(text)
-    .replace(/\r/g, '')
     .split(/\n\s*\n/)
     .map(block => block.replace(/\s+/g, ' ').trim())
     .filter(Boolean);
 
   const chapters = [];
-  let current = {
-    title: language === 'ar' ? 'مقدمة الكتاب' : 'INTRODUCTION',
-    paragraphs: []
-  };
-
+  let current = { title: 'INTRODUCTION', paragraphs: [] };
   let inContents = false;
 
   for (const block of blocks) {
-    if (/^contents$/i.test(block) || /^فهرس المحتويات$/.test(block)) {
+    if (/^contents$/i.test(block)) {
       inContents = true;
       continue;
     }
 
     if (inContents) {
-      if (isChapterHeading(block, language) ||
-          /^[IVXLCDM]+\.\s+[A-Z]/.test(block)) {
+      if (isChapterHeading(block) || /^[IVXLCDM]+\.\s+[A-Z]/.test(block)) {
         inContents = false;
       } else {
         continue;
       }
     }
 
-    if (isChapterHeading(block, language)) {
+    if (isChapterHeading(block)) {
       if (current.paragraphs.length) chapters.push(current);
-
-      current = {
-        title: block,
-        paragraphs: []
-      };
+      current = { title: block, paragraphs: [] };
       continue;
     }
 
@@ -107,54 +88,46 @@ function buildBook(text, language) {
   }
 
   if (current.paragraphs.length) chapters.push(current);
-
   return chapters;
 }
 
 export function openReader({ book, text, onClose }) {
   if (!book || !text) {
-    alert('نص الكتاب غير متاح.');
+    alert('The book text is unavailable.');
     return;
   }
 
-  const arabicOnly = book.id === 4;
-  let language = arabicOnly ? 'ar' : 'en';
-  let englishChapters = arabicOnly ? [] : buildBook(text, 'en');
-  let arabicChapters = arabicOnly ? buildBook(text, 'ar') : null;
-  let loadingArabic = false;
-  let dynamicArabic = false;
-  let renderedPages = [];
-  let translationQueue = Promise.resolve();
-  let translationObserver = null;
-  let darkMode = false;
+  const chapters = buildBook(text);
+  if (!chapters.length) {
+    alert('No readable text was found in this book.');
+    return;
+  }
 
+  let darkMode = false;
+  let renderedPages = [];
+  let scrollSave = 0;
   const progress = savedProgress(book.id);
 
   const container = document.createElement('div');
   container.className = 'reader-overlay';
-
   container.innerHTML = `
     <div class="reader-window">
       <header class="book-toolbar">
-        <button class="reader-close" aria-label="إغلاق">×</button>
+        <button class="reader-close" type="button" aria-label="Close">×</button>
         <div class="toolbar-title">${escapeHTML(book.title)}</div>
         <div class="toolbar-actions">
-          <button class="reader-contents" type="button">الفهرس</button>
-          <button class="reader-language" type="button">العربية</button>
-          <button class="reader-theme" type="button" aria-label="تغيير المظهر">◐</button>
+          <button class="reader-contents" type="button">Contents</button>
+          <button class="reader-theme" type="button" aria-label="Change theme">◐</button>
         </div>
       </header>
-
       <div class="reader-progress"><span></span></div>
-
       <main class="reader-content">
         <article class="reader-book"></article>
       </main>
-
       <aside class="contents-panel" hidden>
         <div class="contents-header">
-          <h2>فهرس الفصول</h2>
-          <button class="contents-close" type="button">×</button>
+          <h2>Chapter Contents</h2>
+          <button class="contents-close" type="button" aria-label="Close contents">×</button>
         </div>
         <nav class="contents-list"></nav>
       </aside>
@@ -165,33 +138,17 @@ export function openReader({ book, text, onClose }) {
 
   const contentArea = container.querySelector('.reader-content');
   const bookArea = container.querySelector('.reader-book');
-  const languageButton = container.querySelector('.reader-language');
-  languageButton.hidden = arabicOnly;
   const contentsPanel = container.querySelector('.contents-panel');
   const contentsList = container.querySelector('.contents-list');
   const progressBar = container.querySelector('.reader-progress span');
 
-  function currentChapters() {
-    return language === 'en'
-      ? englishChapters
-      : (arabicChapters || englishChapters);
-  }
-
   function renderBook() {
-    if (translationObserver) {
-      translationObserver.disconnect();
-      translationObserver = null;
-    }
-
-    const chapters = currentChapters();
-    container.classList.toggle('reader-arabic', language === 'ar');
-
     const pages = [];
     const toc = [];
     let number = 0;
     const maxChars = 1050;
 
-    chapters.forEach((chapter) => {
+    chapters.forEach(chapter => {
       let group = [];
       let count = 0;
       let first = true;
@@ -207,7 +164,11 @@ export function openReader({ book, text, onClose }) {
         });
 
         if (first) {
-          toc.push({ title: chapter.title, pageIndex: pages.length - 1 });
+          toc.push({
+            title: chapter.title,
+            pageIndex: pages.length - 1,
+            pageNumber: number
+          });
         }
 
         group = [];
@@ -219,7 +180,6 @@ export function openReader({ book, text, onClose }) {
         if (group.length && count + paragraph.length > maxChars) {
           addPage();
         }
-
         group.push(paragraph);
         count += paragraph.length;
       });
@@ -228,15 +188,16 @@ export function openReader({ book, text, onClose }) {
     });
 
     renderedPages = pages;
+
     bookArea.innerHTML = pages.map((page, index) => `
       <section class="book-page" id="book-section-${index}">
         ${page.title
           ? `<h2 class="chapter-heading">${escapeHTML(page.title)}</h2>`
           : ''}
         <div class="book-page-text">
-          ${page.paragraphs.map((p, paragraphIndex) =>
-          `<p data-translation-index="${paragraphIndex}">${escapeHTML(p)}</p>`
-        ).join('')}
+          ${page.paragraphs.map(paragraph =>
+            `<p>${escapeHTML(paragraph)}</p>`
+          ).join('')}
         </div>
         <div class="page-number">— ${page.number} —</div>
       </section>
@@ -244,7 +205,8 @@ export function openReader({ book, text, onClose }) {
 
     contentsList.innerHTML = toc.map(item => `
       <button class="toc-entry" type="button" data-index="${item.pageIndex}">
-        ${escapeHTML(item.title)}
+        <span>${escapeHTML(item.title)}</span>
+        <span class="toc-page-number">${item.pageNumber}</span>
       </button>
     `).join('');
 
@@ -253,116 +215,24 @@ export function openReader({ book, text, onClose }) {
         const section = bookArea.querySelector(
           `#book-section-${button.dataset.index}`
         );
-
         if (section) {
           section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-
         contentsPanel.hidden = true;
       });
     });
-
-    languageButton.textContent = language === 'en' ? 'العربية' : 'English';
-
-    if (language === 'ar' && dynamicArabic) {
-      observeArabicPages();
-    }
-  }
-
-  function observeArabicPages() {
-    const sections = bookArea.querySelectorAll('.book-page');
-
-    async function translatePage(section) {
-    if (section.dataset.translationStarted === 'yes') return;
-
-    const pageIndex = Number(section.id.replace('book-section-', ''));
-    const page = renderedPages[pageIndex];
-    if (!page) return;
-
-    section.dataset.translationStarted = 'yes';
-
-    const notice = document.createElement('p');
-    notice.className = 'translation-status';
-    notice.textContent = 'جارٍ ترجمة الصفحة…';
-    notice.style.cssText = 'color:#92764d;text-align:center;padding:12px;font:14px Arial';
-
-    const previousNotice = section.querySelector('.translation-status');
-    if (previousNotice) previousNotice.remove();
-    section.prepend(notice);
-
-    try {
-      const heading = section.querySelector('.chapter-heading');
-
-      if (heading && page.title) {
-        heading.textContent = await translateText(book.id, page.title);
-      }
-
-      const paragraphs = section.querySelectorAll('[data-translation-index]');
-
-      for (const paragraph of paragraphs) {
-        const index = Number(paragraph.dataset.translationIndex);
-        const original = page.paragraphs[index];
-        if (!original) continue;
-
-        paragraph.textContent = await translateText(book.id, original);
-      }
-
-      notice.textContent = 'اكتملت ترجمة الصفحة';
-      notice.style.color = '#63845d';
-      section.dataset.translationStarted = 'done';
-    } catch (error) {
-      section.dataset.translationStarted = 'error';
-      notice.textContent = error.message || 'تعذرت ترجمة الصفحة.';
-
-      const retry = document.createElement('button');
-      retry.type = 'button';
-      retry.textContent = 'إعادة المحاولة';
-      retry.style.cssText = 'display:block;margin:8px auto;padding:8px 16px;cursor:pointer';
-
-      retry.addEventListener('click', () => {
-        section.dataset.translationStarted = '';
-        translatePage(section);
-      });
-
-      notice.appendChild(retry);
-      notice.style.color = '#a65b35';
-    }
-  }
-
-    if (!('IntersectionObserver' in window)) {
-      if (sections[0]) {
-        translationQueue = translationQueue.then(() => translatePage(sections[0]));
-      }
-      return;
-    }
-
-    translationObserver = new IntersectionObserver(entries => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-
-        translationObserver.unobserve(entry.target);
-        translationQueue = translationQueue.then(() => translatePage(entry.target));
-      }
-    }, {
-      root: contentArea,
-      rootMargin: '100px 0px',
-      threshold: 0.01
-    });
-
-    sections.forEach(section => translationObserver.observe(section));
   }
 
   function updateProgress() {
     const max = contentArea.scrollHeight - contentArea.clientHeight;
-    const percent = max > 0
-      ? (contentArea.scrollTop / max) * 100
-      : 0;
-
+    const percent = max > 0 ? (contentArea.scrollTop / max) * 100 : 0;
     progressBar.style.width = `${percent}%`;
-    saveProgress(book.id, language, contentArea.scrollTop);
+    saveProgress(book.id, contentArea.scrollTop);
   }
 
-  let scrollSave = 0;
+  function persistReadingPosition() {
+    saveProgress(book.id, contentArea.scrollTop);
+  }
 
   contentArea.addEventListener('scroll', () => {
     if (!scrollSave) {
@@ -373,70 +243,11 @@ export function openReader({ book, text, onClose }) {
     }
   });
 
-  async function toggleLanguage() {
-    if (loadingArabic) return;
-
-    saveProgress(book.id, language, contentArea.scrollTop);
-
-    if (language === 'en') {
-      if (!arabicChapters) {
-        loadingArabic = true;
-        languageButton.disabled = true;
-        languageButton.textContent = 'جارٍ التحميل...';
-
-        try {
-          const response = await fetch(`/books/${book.id}.ar.txt`);
-          const contentType = response.headers.get('content-type') || '';
-          const translatedText = await response.text();
-
-          const isHtml =
-            /text\/html/i.test(contentType) ||
-            /^\s*(?:<!doctype\s+html|<html[\s>])/i.test(translatedText);
-
-          if (response.ok && translatedText.trim() && !isHtml) {
-            arabicChapters = buildBook(translatedText, 'ar');
-            dynamicArabic = false;
-          } else {
-            arabicChapters = null;
-            dynamicArabic = true;
-          }
-        } catch (error) {
-          dynamicArabic = true;
-          arabicChapters = null;
-        }
-
-        loadingArabic = false;
-        languageButton.disabled = false;
-      }
-
-      language = 'ar';
-    } else {
-      language = 'en';
-    }
-
-    renderBook();
-
-    const latestProgress = savedProgress(book.id);
-    contentArea.scrollTop = latestProgress[
-      language === 'en' ? 'enScroll' : 'arScroll'
-    ] || 0;
-
-    updateProgress();
-  }
-
-  function persistReadingPosition() {
-    saveProgress(book.id, language, contentArea.scrollTop);
-  }
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) persistReadingPosition();
-  });
-
-  window.addEventListener('pagehide', persistReadingPosition);
-
   function close() {
     persistReadingPosition();
     document.removeEventListener('keydown', keyboardHandler);
+    document.removeEventListener('visibilitychange', visibilityHandler);
+    window.removeEventListener('pagehide', persistReadingPosition);
     container.remove();
     if (onClose) onClose();
   }
@@ -451,41 +262,40 @@ export function openReader({ book, text, onClose }) {
     }
   }
 
-  container.querySelector('.reader-close')
-    .addEventListener('click', close);
+  function visibilityHandler() {
+    if (document.hidden) persistReadingPosition();
+  }
 
-  languageButton.addEventListener('click', toggleLanguage);
+  container.querySelector('.reader-close').addEventListener('click', close);
 
-  container.querySelector('.reader-contents')
-    .addEventListener('click', () => {
-      contentsPanel.hidden = !contentsPanel.hidden;
-    });
+  container.querySelector('.reader-contents').addEventListener('click', () => {
+    contentsPanel.hidden = !contentsPanel.hidden;
+  });
 
-  container.querySelector('.contents-close')
-    .addEventListener('click', () => {
-      contentsPanel.hidden = true;
-    });
+  container.querySelector('.contents-close').addEventListener('click', () => {
+    contentsPanel.hidden = true;
+  });
 
-  container.querySelector('.reader-theme')
-    .addEventListener('click', () => {
-      darkMode = !darkMode;
-      container.classList.toggle('reader-dark-paper', darkMode);
-    });
+  container.querySelector('.reader-theme').addEventListener('click', () => {
+    darkMode = !darkMode;
+    container.classList.toggle('reader-dark-paper', darkMode);
+  });
 
   document.addEventListener('keydown', keyboardHandler);
+  document.addEventListener('visibilitychange', visibilityHandler);
+  window.addEventListener('pagehide', persistReadingPosition);
 
   renderBook();
 
   requestAnimationFrame(() => {
-    const savedPosition = arabicOnly ? progress.arScroll : progress.enScroll;
-    contentArea.scrollTop = savedPosition || 0;
+    contentArea.scrollTop = progress.enScroll || 0;
     updateProgress();
   });
 }
 
 export function openPdfReader({ book, file }) {
   if (!book || !file) {
-    alert('لم يتم اختيار ملف.');
+    alert('No file was selected.');
     return;
   }
 
@@ -493,7 +303,7 @@ export function openPdfReader({ book, file }) {
     file.name.toLowerCase().endsWith('.pdf');
 
   if (!isPdf) {
-    alert('الملف المختار ليس بصيغة PDF.');
+    alert('The selected file is not a PDF.');
     return;
   }
 
@@ -504,16 +314,14 @@ export function openPdfReader({ book, file }) {
   container.innerHTML = `
     <div class="reader-window">
       <header class="book-toolbar">
-        <button class="reader-close" aria-label="إغلاق">×</button>
+        <button class="reader-close" type="button" aria-label="Close">×</button>
         <div class="toolbar-title">${escapeHTML(book.title)}</div>
-        <div class="toolbar-actions">
-          <span>PDF</span>
-        </div>
+        <div class="toolbar-actions"><span>PDF</span></div>
       </header>
       <main class="reader-content pdf-reader-content">
         <iframe
           class="pdf-frame"
-          title="قارئ PDF"
+          title="PDF Reader"
           src="${pdfUrl}"
           style="width:100%;height:100%;min-height:70vh;border:0;background:#fff"
         ></iframe>
@@ -533,8 +341,6 @@ export function openPdfReader({ book, file }) {
     if (event.key === 'Escape') closePdf();
   }
 
-  container.querySelector('.reader-close')
-    .addEventListener('click', closePdf);
-
+  container.querySelector('.reader-close').addEventListener('click', closePdf);
   document.addEventListener('keydown', keyboardHandler);
 }

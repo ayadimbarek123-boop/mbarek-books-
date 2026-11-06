@@ -114,23 +114,6 @@
   overflow-wrap: break-word;
 }
 
-.reader-arabic .reader-book {
-  direction: rtl;
-  font-family: Georgia, "Times New Roman", serif;
-}
-
-.reader-arabic .chapter-heading {
-  font-family: Arial, sans-serif;
-}
-
-.reader-arabic .book-section p {
-  direction: rtl;
-  text-align: justify;
-  line-height: 2.15;
-  font-family: Arial, sans-serif;
-  font-size: 1.18rem;
-}
-
 .contents-panel {
   position: absolute;
   z-index: 5;
@@ -233,16 +216,13 @@
     line-height: 1.95;
   }
 
-  .reader-arabic .book-section p {
-    font-size: 1.12rem;
-  }
 
   .chapter-heading {
     font-size: 1.35rem;
   }
 }
 
-/* ترقيم صفحات الكتاب */
+/* Book page numbering */
 .book-page {
   min-height: calc(100svh - 125px);
   box-sizing: border-box;
@@ -276,42 +256,84 @@
   color: #d5b77d;
 }
 
-/* Automatic reading direction by book language */
-.reader-overlay:not(.reader-arabic) .reader-book,
-.reader-overlay:not(.reader-arabic) .book-page-text,
-.reader-overlay:not(.reader-arabic) .book-page-text p {
+/* MBAREK BOOKS — English Reader LTR */
+.reader-overlay,
+.reader-window,
+.reader-content,
+.reader-book,
+.book-section,
+.book-page {
   direction: ltr;
   text-align: left;
 }
 
-.reader-overlay.reader-arabic .reader-book,
-.reader-overlay.reader-arabic .book-page-text,
-.reader-overlay.reader-arabic .book-page-text p {
-  direction: rtl;
-  text-align: right;
+.reader-overlay {
+  font-family: Georgia, "Times New Roman", serif;
 }
 
-.reader-overlay:not(.reader-arabic) .book-page-text p,
-.reader-overlay.reader-arabic .book-page-text p {
+.book-section p,
+.book-page-text {
+  direction: ltr;
   text-align: justify;
 }
 
-/* Final language direction override */
-.reader-overlay:not(.reader-arabic) .reader-book,
-.reader-overlay:not(.reader-arabic) .book-page,
-.reader-overlay:not(.reader-arabic) .book-page-text,
-.reader-overlay:not(.reader-arabic) .book-page-text p {
-  direction: ltr !important;
+.chapter-heading {
+  direction: ltr;
+  text-align: center;
 }
 
-.reader-overlay:not(.reader-arabic) .book-page-text p {
-  text-align: justify !important;
-  unicode-bidi: embed;
+.contents-panel {
+  right: auto;
+  left: 14px;
+  direction: ltr;
+  text-align: left;
 }
 
-.reader-overlay.reader-arabic .reader-book,
-.reader-overlay.reader-arabic .book-page,
-.reader-overlay.reader-arabic .book-page-text,
-.reader-overlay.reader-arabic .book-page-text p {
-  direction: rtl !important;
+.contents-header {
+  direction: ltr;
+}
+
+.toc-entry {
+  direction: ltr;
+  text-align: left;
+}
+
+.toolbar-title {
+  direction: ltr;
+}
+
+@media (max-width: 600px) {
+  .contents-panel {
+    left: 10px;
+    right: auto;
+    width: calc(100% - 20px);
+  }
+}
+
+/* ===== MBAREK BOOKS — READER PAGE TYPOGRAPHY FIX ===== */
+.book-page-text {
+  width: 100%;
+  direction: ltr;
+  text-align: justify;
+}
+
+.book-page-text p {
+  margin: 0 0 1.25em;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.16rem;
+  line-height: 2;
+  color: #302c25;
+  text-align: justify;
+  overflow-wrap: break-word;
+}
+
+.reader-dark-paper .book-page-text p {
+  color: #e1d8c8;
+}
+
+@media (max-width: 600px) {
+  .book-page-text p {
+    font-size: 1.08rem;
+    line-height: 1.95;
+  }
 }
