@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ayadimbarek123-boop.github.io/mbarek-books-/sitemap.xml
