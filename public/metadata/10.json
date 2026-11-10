@@ -1,0 +1,16 @@
+{
+  "id": 10,
+  "title": "The Count of Monte Cristo",
+  "title_ar": "الكونت دي مونت كريستو",
+  "author": "Alexandre Dumas",
+  "author_ar": "ألكسندر دوما",
+  "category": "الأدب والروايات والمغامرات",
+  "language": "en",
+  "year": 1844,
+  "source": "Project Gutenberg",
+  "source_id": "1184",
+  "source_url": "https://www.gutenberg.org/ebooks/1184",
+  "license_note": "نسخة Project Gutenberg؛ تحقق من الوضع القانوني للنص والترجمة والغلاف في بلد التوزيع.",
+  "rights_verified": false,
+  "description": "رواية مغامرات وانتقام تدور حول الخيانة والعدالة والحرية."
+}

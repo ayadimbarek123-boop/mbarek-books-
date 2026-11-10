@@ -1,5 +1,6 @@
 
 
+import { loadAudiobooks, renderAudiobooks, bindAudiobookEvents } from './audio/audiobooks.js';
 import './style.css';
 import { openReader, openPdfReader } from './reader/reader.js';
 import { books } from './data/books.js';
@@ -29,28 +30,54 @@ let activeCategory = 'All';
 let searchQuery = '';
 let sortOrder = 'default';
 let activePage = 'home';
-let favorites = JSON.parse(localStorage.getItem('mbarekFavorites') || '[]');
-let readingList = JSON.parse(localStorage.getItem('mbarekReading') || '[]');
+
+function loadSavedIds(key) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || '[]');
+    return Array.isArray(value)
+      ? value.filter(id => Number.isSafeInteger(id) && id > 0)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveSavedIds(key, ids) {
+  try {
+    localStorage.setItem(key, JSON.stringify(ids));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+let favorites = loadSavedIds('mbarekFavorites');
+let readingList = loadSavedIds('mbarekReading');
 let selectedBook = null;
 
 function bookCard(book) {
   const favorite = favorites.includes(book.id);
+  const title = escapeHTML(book.title);
+  const author = escapeHTML(book.author);
+  const cover = escapeHTML(book.cover || '');
+  const id = Number.isSafeInteger(book.id) ? book.id : 0;
+  const rating = Number.isFinite(Number(book.rating)) && Number(book.rating) >= 0 && Number(book.rating) <= 5 ? Number(book.rating).toFixed(1) : '';
 
   return `
     <article class="book-card">
-      <div class="book-cover-wrap" data-book="${book.id}">
-        <img class="book-cover" src="${book.cover}" alt="${book.title}"
-          onerror="this.src='https://placehold.co/300x430/151515/D6B15F?text=BOOK'">
+      <div class="book-cover-wrap" data-book="${id}">
+        <img class="book-cover" src="${cover}" alt="${title}"
+         >
         <button class="favorite-btn ${favorite ? 'active' : ''}"
-          data-favorite="${book.id}" aria-label="Add to favorites">
+          data-favorite="${id}" aria-label="Add to favorites">
           ${favorite ? '♥' : '♡'}
         </button>
       </div>
       <div class="book-info">
-        ${book.rating ? `<div class="book-rating">★ ${book.rating} <small>${book.ratingVerified ? "Verified" : "Unverified"}</small></div>` : ""}
-        <h3>${book.title}</h3>
-        <p>${book.author}</p>
-        <button class="small-action" data-book="${book.id}">Discover book <span>←</span></button>
+        ${rating ? `<div class="book-rating">★ ${rating} <small>${book.ratingVerified ? "Verified" : "Unverified"}</small></div>` : ""}
+        <h3>${title}</h3>
+        <p>${author}</p>
+        <button class="small-action" data-book="${id}">Discover book <span>←</span></button>
       </div>
     </article>
   `;
@@ -60,7 +87,7 @@ function bookCard(book) {
 function renderHome() {
   const filtered = books.filter(book => {
     const matchesCategory = activeCategory === 'All' || book.category === activeCategory;
-    const matchesSearch = `${book.title} ${book.titleAr || ''} ${book.author} ${book.authorAr || ''} ${categoryLabel(book.category)}`
+    const matchesSearch = `${book.title} ${book.titleAr || ''} ${book.author} ${book.authorAr || ''} ${book.category || ''}`
       .toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
@@ -109,7 +136,7 @@ function renderHome() {
       <div class="category-list">
         ${categories.map(cat => `
           <button class="category-chip ${activeCategory === cat ? 'selected' : ''}"
-            data-category="${cat}">${categoryLabel(cat)}</button>
+            data-category="${escapeHTML(cat)}">${escapeHTML(categoryLabel(cat))}</button>
         `).join('')}
       </div>
     </section>
@@ -158,22 +185,29 @@ function renderPersonalPage() {
 }
 
 function renderDetails(book) {
+  const title = escapeHTML(book.title);
+  const author = escapeHTML(book.author);
+  const category = escapeHTML(categoryLabel(book.category));
+  const cover = escapeHTML(book.cover || '');
+  const originalTitle = escapeHTML(book.originalTitle || '');
+  const rating = Number.isFinite(Number(book.rating)) && Number(book.rating) >= 0 && Number(book.rating) <= 5 ? Number(book.rating).toFixed(1) : '';
+
   return `
     <button class="back-btn" id="backBtn">→ Back to library</button>
     <section class="details">
-      <img src="${book.cover}" alt="${book.title}" onerror="this.style.display='none'">
+      <img src="${cover}" alt="${title}">
       <div>
-        <span class="eyebrow">${categoryLabel(book.category)}</span>
-        <h1>${book.title}</h1>
-        <p>By: ${book.author}</p>
-        ${book.originalTitle ? `<p>Original title: ${book.originalTitle}</p>` : ""}
-        ${book.rating ? `<p>Rating: ★ ${book.rating} — ${book.ratingVerified ? "Verified by Goodreads" : "Unverified"}</p>` : ""}
+        <span class="eyebrow">${category}</span>
+        <h1>${title}</h1>
+        <p>By: ${author}</p>
+        ${book.originalTitle ? `<p>Original title: ${originalTitle}</p>` : ""}
+        ${rating ? `<p>Rating: ★ ${rating} — ${book.ratingVerified ? "Verified by Goodreads" : "Unverified"}</p>` : ""}
         ${book.year ? `<p>Publication year: ${book.year}</p>` : ""}
         <button class="gold-button" id="addReading">Add to my reading list</button>
         ${book.textUrl
           ? '<button class="gold-button" id="openBookReader">Read book ←</button>'
           : book.externalReadUrl
-            ? `<a class="gold-button" href="${escapeHTML(book.externalReadUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;text-decoration:none">Read from source ↗</a>`
+            ? `<a class="gold-button" href="${safeExternalUrl(book.externalReadUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;text-decoration:none">Read from source ↗</a>`
             : '<p class="notice">The reading edition is currently unavailable.</p>'}
         ${book.id === 1 ? '<a class="gold-button" href="https://openlibrary.org/books/OL22752164M/One_hundred_years_of_solitude" target="_blank" rel="noopener noreferrer" style="display:inline-block;text-decoration:none">Borrow from Open Library ↗</a>' : ""}
         ${book.id === 4 ? '<button class="gold-button" id="chooseLocalPdf" type="button">Choose a PDF from your device</button><input id="localPdfInput" type="file" accept="application/pdf,.pdf" hidden>' : ""}
@@ -190,12 +224,24 @@ function escapeHTML(value) {
   })[char]);
 }
 
+function safeExternalUrl(value) {
+  if (typeof value !== 'string') return '';
+  try {
+    const url = new URL(value);
+    return ['https:', 'http:'].includes(url.protocol) ? escapeHTML(url.href) : '';
+  } catch {
+    return '';
+  }
+}
+
 function render() {
   let content = selectedBook
     ? renderDetails(selectedBook)
     : activePage === 'home'
       ? renderHome()
-      : renderPersonalPage();
+      : activePage === 'audiobooks'
+        ? renderAudiobooks()
+        : renderPersonalPage();
 
   app.innerHTML = `
     <header class="topbar">
@@ -207,6 +253,7 @@ function render() {
         <button data-page="home" class="${activePage === 'home' ? 'nav-active' : ''}">Home</button>
         <button data-page="reading" class="${activePage === 'reading' ? 'nav-active' : ''}">My reading list</button>
         <button data-page="favorites" class="${activePage === 'favorites' ? 'nav-active' : ''}">Favorites</button>
+        <button data-page="audiobooks" class="${activePage === 'audiobooks' ? 'nav-active' : ''}">Audiobooks</button>
       </nav>
       <button class="header-search" id="headerSearch">⌕ <span>Find a book</span></button>
     </header>
@@ -240,10 +287,12 @@ function render() {
       <button data-page="home"><span>⌂</span>Home</button>
       <button data-page="reading"><span>▤</span>My Library</button>
       <button data-page="favorites"><span>♡</span>Favorites</button>
+      <button data-page="audiobooks" class="${activePage === 'audiobooks' ? 'nav-active' : ''}"><span>♫</span>Audio</button>
     </nav>
   `;
 
   bindEvents();
+  if (activePage === 'audiobooks' && !selectedBook) bindAudiobookEvents();
 }
 
 function bindEvents() {
@@ -252,6 +301,11 @@ function bindEvents() {
       activePage = button.dataset.page;
       selectedBook = null;
       render();
+      if (activePage === 'audiobooks') {
+        loadAudiobooks().then(() => {
+          if (activePage === 'audiobooks' && !selectedBook) render();
+        }).catch(error => console.error('Audiobooks loading failed:', error));
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
@@ -270,7 +324,7 @@ function bindEvents() {
       favorites = favorites.includes(id)
         ? favorites.filter(item => item !== id)
         : [...favorites, id];
-      localStorage.setItem('mbarekFavorites', JSON.stringify(favorites));
+      saveSavedIds('mbarekFavorites', favorites);
       render();
     });
   });
@@ -373,7 +427,14 @@ function bindEvents() {
       }
 
       const contentType = (response.headers.get('content-type') || '').toLowerCase();
+      const contentLength = Number(response.headers.get('content-length') || 0);
+      if (contentLength > 10 * 1024 * 1024) {
+        throw new Error('Book files must be 10 MB or smaller.');
+      }
       const text = await response.text();
+      if (new Blob([text]).size > 10 * 1024 * 1024) {
+        throw new Error('Book files must be 10 MB or smaller.');
+      }
 
       if (!text.trim()) {
         throw new Error('The book file is empty.');
@@ -399,7 +460,7 @@ function bindEvents() {
   document.querySelector('#addReading')?.addEventListener('click', () => {
     if (!readingList.includes(selectedBook.id)) {
       readingList.push(selectedBook.id);
-      localStorage.setItem('mbarekReading', JSON.stringify(readingList));
+      saveSavedIds('mbarekReading', readingList);
     }
     alert('Book added to your reading list.');
   });

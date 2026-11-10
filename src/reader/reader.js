@@ -293,7 +293,7 @@ export function openReader({ book, text, onClose }) {
   });
 }
 
-export function openPdfReader({ book, file }) {
+export async function openPdfReader({ book, file }) {
   if (!book || !file) {
     alert('No file was selected.');
     return;
@@ -304,6 +304,17 @@ export function openPdfReader({ book, file }) {
 
   if (!isPdf) {
     alert('The selected file is not a PDF.');
+    return;
+  }
+
+  if (file.size < 5 || file.size > 50 * 1024 * 1024) {
+    alert('PDF files must be between 5 bytes and 50 MB.');
+    return;
+  }
+
+  const header = await file.slice(0, 5).text();
+  if (header !== '%PDF-') {
+    alert('The file does not contain a valid PDF signature.');
     return;
   }
 

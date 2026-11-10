@@ -12,3 +12,22 @@ dist/
 /temp/
 /translation_parts/
 /public/prince-preview.html
+
+# Private research and backups
+/backups/
+/research/
+
+# Unverified assets
+/public/covers/unverified/
+/public/covers/6.svg
+/public/covers/9.svg
+/public/covers/11.svg
+/public/covers/12.svg
+/public/covers/33.jpg
+/public/covers/34.jpg
+/public/covers/35.jpg
+/public/covers/36.jpg
+/public/covers/37.jpg
+
+# Unpublished audiobook recordings
+/public/audio/nazariyat-al-fustuq/
